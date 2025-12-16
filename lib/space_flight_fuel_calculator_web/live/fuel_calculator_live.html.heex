@@ -1,0 +1,100 @@
+<Layouts.app flash={@flash}>
+  <div class="mx-auto">
+    <div class="text-center mb-8">
+      <p class="text-base-content/70">Calculate fuel requirements for interplanetary travel</p>
+    </div>
+
+    <div class="flex flex-col md:flex-row gap-8 justify-around items-start">
+      <div class="card bg-base-200 w-full p-6 space-y-6">
+        <.form for={@form} phx-change="validate" id="params-form">
+          <.input
+            field={@form[:mass]}
+            type="number"
+            label="Spacecraft mass (kg)"
+            placeholder="e.g. 28801"
+            min="1"
+          />
+        </.form>
+        <label class="label">Waypoints</label>
+        <ul class="steps steps-vertical overflow-visible">
+          <li
+            :for={{waypoint, index} <- Enum.with_index(@selected_waypoints)}
+            class="step step-neutral"
+          >
+            <span class="step-icon">
+              <.planetary_object_icon object={waypoint} />
+            </span>
+            <div class="flex flex-row gap-2">
+              <span class="w-16">{capitalize(waypoint)}</span>
+              <button
+                type="button"
+                phx-click="remove_waypoint"
+                phx-value-index={index}
+                class="btn btn-ghost btn-sm text-error"
+                title="Remove waypoint"
+              >
+                <.icon name="hero-minus" class="size-4" />
+              </button>
+            </div>
+          </li>
+          <li class="step step-primary">
+            <span class="step-icon"><.icon name="hero-globe-alt" /></span>
+            <div class="dropdown dropdown-right">
+              <div tabindex="0" role="button" class="btn m-1">
+                <.icon name="hero-plus" class="size-4" />
+              </div>
+              <ul
+                tabindex="-1"
+                class="dropdown-content menu bg-base-100 rounded-box z-1 p-2 shadow-sm"
+              >
+                <li :for={{label, value} <- @waypoints}>
+                  <button
+                    phx-click="add_waypoint"
+                    phx-value-waypoint={value}
+                    class="btn btn-ghost justify-start"
+                    title="Add waypoint"
+                  >
+                    <.planetary_object_icon object={value} />
+                    {label}
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card bg-base-200 w-full p-6">
+        <h2 class="text-lg font-semibold mb-4">Flight Path Steps</h2>
+        <%= if @params.flight_path == [] do %>
+          <p class="text-base-content/50 text-center py-4">
+            No steps added yet. Add a waypoint to build your flight path.
+          </p>
+        <% else %>
+          <ul class="steps steps-vertical">
+            <li
+              :for={{step, index} <- Enum.with_index(@params.flight_path)}
+              class={[
+                "step",
+                if(step.action == :launch, do: "step-primary", else: "step-secondary")
+              ]}
+            >
+              <span :if={step.action == :launch}>Launch from {capitalize(step.waypoint)}</span>
+              <span :if={step.action == :land}>Land on {capitalize(step.waypoint)}</span>
+            </li>
+          </ul>
+        <% end %>
+      </div>
+
+      <div class="card bg-base-200 w-full p-6">
+        <h2 class="text-lg font-semibold mb-4">Total Fuel Required</h2>
+
+        <div class="text-center py-4">
+          <p class="text-4xl font-bold text-primary">{@total_fuel}</p>
+
+          <p class="text-base-content/70 mt-1">kilograms</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layouts.app>
