@@ -73,7 +73,7 @@
         <% else %>
           <ul class="steps steps-vertical">
             <li
-              :for={{step, index} <- Enum.with_index(@params.flight_path)}
+              :for={step <- @params.flight_path}
               class={[
                 "step",
                 if(step.action == :launch, do: "step-primary", else: "step-secondary")
